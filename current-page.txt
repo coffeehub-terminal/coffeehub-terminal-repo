@@ -1,0 +1,436 @@
+"use client";
+
+import { useState } from "react";
+
+type Lot = {
+  id: number;
+  companyName: string;
+  lotReference: string;
+  lotNumber: string;
+  origin: string;
+  processMethod: string;
+  score: string;
+  fobBuenaventura: string;
+  harvestYear: string;
+  requiredBags: string;
+  certifications: string;
+};
+
+type Offer = {
+  id: string;
+  lotNumber: string;
+  companyName: string;
+  origin: string;
+  status: string;
+};
+
+type Deal = {
+  id: string;
+  offerId: string;
+  lotNumber: string;
+  status: string;
+};
+
+export default function Home() {
+  const [activeScreen, setActiveScreen] = useState("inventory");
+
+  const [lots, setLots] = useState<Lot[]>([
+    {
+      id: 1,
+      companyName: "Cafe Exportadora SAS",
+      lotReference: "REF-001",
+      lotNumber: "LOT-001",
+      origin: "Huila",
+      processMethod: "Washed",
+      score: "86",
+      fobBuenaventura: "4.25",
+      harvestYear: "2024/2025",
+      requiredBags: "40",
+      certifications: "Organic",
+    },
+  ]);
+
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
+  const [showLotForm, setShowLotForm] = useState(false);
+
+  const [newLot, setNewLot] = useState({
+    companyName: "",
+    lotReference: "",
+    lotNumber: "",
+    origin: "",
+    processMethod: "",
+    score: "",
+    fobBuenaventura: "",
+    harvestYear: "",
+    requiredBags: "",
+    certifications: "",
+  });
+
+  const addLot = () => {
+    if (
+      !newLot.companyName ||
+      !newLot.lotReference ||
+      !newLot.lotNumber
+    ) {
+      return;
+    }
+
+    const lot: Lot = {
+      id: Date.now(),
+      ...newLot,
+    };
+
+    setLots([...lots, lot]);
+
+    setNewLot({
+      companyName: "",
+      lotReference: "",
+      lotNumber: "",
+      origin: "",
+      processMethod: "",
+      score: "",
+      fobBuenaventura: "",
+      harvestYear: "",
+      requiredBags: "",
+      certifications: "",
+    });
+
+    setShowLotForm(false);
+  };
+
+  const createOffer = (lot: Lot) => {
+    const offer: Offer = {
+      id: `OFF-${String(offers.length + 1).padStart(3, "0")}`,
+      lotNumber: lot.lotNumber,
+      companyName: lot.companyName,
+      origin: lot.origin,
+      status: "Open",
+    };
+
+    setOffers([...offers, offer]);
+    setActiveScreen("offers");
+  };
+
+  const createDeal = (offer: Offer) => {
+    const deal: Deal = {
+      id: `DEAL-${String(deals.length + 1).padStart(3, "0")}`,
+      offerId: offer.id,
+      lotNumber: offer.lotNumber,
+      status: "Confirmed",
+    };
+
+    setDeals([...deals, deal]);
+
+    setOffers(
+      offers.filter((existing) => existing.id !== offer.id)
+    );
+
+    setActiveScreen("deals");
+  };
+
+  return (
+    <main className="min-h-screen bg-[#071412] text-white">
+      <div className="flex">
+
+        <aside className="w-64 min-h-screen bg-[#05100e] border-r border-gray-800 p-6">
+
+          <h1 className="text-3xl font-bold text-green-400 mb-10">
+            CoffeeHub
+          </h1>
+
+          <nav className="space-y-3">
+
+            <button
+              onClick={() => setActiveScreen("inventory")}
+              className="block w-full text-left px-4 py-3 rounded hover:bg-[#10231e]"
+            >
+              ☕ Inventory
+            </button>
+
+            <button
+              onClick={() => setActiveScreen("offers")}
+              className="block w-full text-left px-4 py-3 rounded hover:bg-[#10231e]"
+            >
+              📦 Offers
+            </button>
+
+            <button
+              onClick={() => setActiveScreen("deals")}
+              className="block w-full text-left px-4 py-3 rounded hover:bg-[#10231e]"
+            >
+              🤝 Deals
+            </button>
+
+            <div className="border-t border-gray-800 mt-6 pt-6 text-gray-500 space-y-2">
+              <div>🏢 CRM</div>
+              <div>🧪 Samples</div>
+              <div>📄 Purchase Orders</div>
+              <div>📜 Contracts</div>
+              <div>🚚 Logistics</div>
+              <div>📊 Analytics</div>
+            </div>
+
+          </nav>
+
+        </aside>
+
+        <section className="flex-1 p-8">
+
+          <h2 className="text-5xl font-bold text-green-400 mb-8">
+            CoffeeHub Terminal
+          </h2>
+
+          {activeScreen === "inventory" && (
+            <div className="bg-[#10231e] rounded-xl p-6">
+
+              <div className="flex justify-between items-center mb-6">
+
+                <h3 className="text-2xl font-bold">
+                  Inventory Engine
+                </h3>
+
+                <button
+                  onClick={() => setShowLotForm(!showLotForm)}
+                  className="bg-green-500 text-black px-4 py-2 rounded-lg font-bold"
+                >
+                  + New Lot
+                </button>
+
+              </div>
+
+              {showLotForm && (
+                <div className="grid grid-cols-2 gap-4 mb-8">
+
+                  <input
+                    placeholder="Company Name"
+                    value={newLot.companyName}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        companyName: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Lot Reference"
+                    value={newLot.lotReference}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        lotReference: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Lot Number"
+                    value={newLot.lotNumber}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        lotNumber: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Origin"
+                    value={newLot.origin}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        origin: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Process Method"
+                    value={newLot.processMethod}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        processMethod: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Score"
+                    value={newLot.score}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        score: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="FOB Buenaventura"
+                    value={newLot.fobBuenaventura}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        fobBuenaventura: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Harvest Year"
+                    value={newLot.harvestYear}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        harvestYear: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Required Bags"
+                    value={newLot.requiredBags}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        requiredBags: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <input
+                    placeholder="Certifications"
+                    value={newLot.certifications}
+                    onChange={(e) =>
+                      setNewLot({
+                        ...newLot,
+                        certifications: e.target.value,
+                      })
+                    }
+                    className="bg-black p-2 rounded"
+                  />
+
+                  <button
+                    onClick={addLot}
+                    className="bg-green-500 text-black font-bold rounded p-2"
+                  >
+                    Save Lot
+                  </button>
+
+                </div>
+              )}
+
+              <table className="w-full">
+
+                <thead>
+                  <tr className="border-b border-gray-700 text-left">
+                    <th className="pb-3">Lot</th>
+                    <th className="pb-3">Company</th>
+                    <th className="pb-3">Origin</th>
+                    <th className="pb-3">Process</th>
+                    <th className="pb-3">Score</th>
+                    <th className="pb-3">Bags</th>
+                    <th className="pb-3">FOB</th>
+                    <th className="pb-3">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  {lots.map((lot) => (
+                    <tr
+                      key={lot.id}
+                      className="border-b border-gray-800"
+                    >
+                      <td className="py-4">{lot.lotNumber}</td>
+                      <td>{lot.companyName}</td>
+                      <td>{lot.origin}</td>
+                      <td>{lot.processMethod}</td>
+                      <td>{lot.score}</td>
+                      <td>{lot.requiredBags}</td>
+                      <td>{lot.fobBuenaventura}</td>
+
+                      <td>
+                        <button
+                          onClick={() => createOffer(lot)}
+                          className="bg-green-500 text-black px-3 py-1 rounded"
+                        >
+                          Create Offer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+          )}
+
+          {activeScreen === "offers" && (
+            <div className="bg-[#10231e] rounded-xl p-6">
+
+              <h3 className="text-3xl font-bold mb-6">
+                Offer Engine
+              </h3>
+
+              {offers.map((offer) => (
+                <div
+                  key={offer.id}
+                  className="border-b border-gray-800 py-4 flex justify-between"
+                >
+                  <div>
+                    {offer.id} | {offer.lotNumber} | {offer.origin}
+                  </div>
+
+                  <button
+                    onClick={() => createDeal(offer)}
+                    className="bg-green-500 text-black px-3 py-1 rounded"
+                  >
+                    Convert To Deal
+                  </button>
+                </div>
+              ))}
+
+            </div>
+          )}
+
+          {activeScreen === "deals" && (
+            <div className="bg-[#10231e] rounded-xl p-6">
+
+              <h3 className="text-3xl font-bold mb-6">
+                Deal Engine
+              </h3>
+
+              {deals.map((deal) => (
+                <div
+                  key={deal.id}
+                  className="border-b border-gray-800 py-4"
+                >
+                  {deal.id} | {deal.offerId} | {deal.status}
+                </div>
+              ))}
+
+            </div>
+          )}
+
+        </section>
+
+      </div>
+    </main>
+  );
+}

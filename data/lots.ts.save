@@ -1,0 +1,9 @@
+export const lots = [
+  {
+    id: 1,
+    lotNumber: "LOT-001",
+    origin: "Colombia",
+  },
+];
+
+
